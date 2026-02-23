@@ -259,9 +259,20 @@ export const DataProvider = ({ children }) => {
     const addInventoryItem = async (item) => {
         try {
             const response = await api.post('inventory', item);
-            const newItem = response.data;
-            setInventory([...inventory, newItem]);
-            return newItem;
+            // API returns { status, message, data: {...} }
+            const raw = response.data?.data || response.data;
+            const mappedItem = {
+                id: raw.id,
+                title: raw.item_name,
+                category: raw.category,
+                subcategory_id: raw.subcategory_id,
+                stock: raw.stock_quantity,
+                price: raw.cost_per_unit,
+                status: raw.is_low_stock ? 'Low Stock' : (raw.stock_quantity === 0 ? 'Out of Stock' : 'In Stock'),
+                image: raw.image || null
+            };
+            setInventory([...inventory, mappedItem]);
+            return mappedItem;
         } catch (error) {
             console.error('Add inventory error:', error);
             throw error;
@@ -271,9 +282,20 @@ export const DataProvider = ({ children }) => {
     const updateInventoryItem = async (id, item) => {
         try {
             const response = await api.put(`inventory/${id}`, item);
-            const updatedItem = response.data;
-            setInventory(inventory.map(i => i.id === id ? updatedItem : i));
-            return updatedItem;
+            // API returns { status, message, data: {...} }
+            const raw = response.data?.data || response.data;
+            const mappedItem = {
+                id: raw.id,
+                title: raw.item_name,
+                category: raw.category,
+                subcategory_id: raw.subcategory_id,
+                stock: raw.stock_quantity,
+                price: raw.cost_per_unit,
+                status: raw.is_low_stock ? 'Low Stock' : (raw.stock_quantity === 0 ? 'Out of Stock' : 'In Stock'),
+                image: raw.image || null
+            };
+            setInventory(inventory.map(i => i.id === id ? mappedItem : i));
+            return mappedItem;
         } catch (error) {
             console.error('Update inventory error:', error);
             throw error;
