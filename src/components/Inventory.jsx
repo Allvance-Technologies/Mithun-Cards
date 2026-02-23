@@ -129,18 +129,19 @@ const Inventory = () => {
 
                     <div className="card" style={{ marginBottom: '24px' }}>
                         <div className="order-selection-row">
-                            <button className="action-btn" onClick={() => navigate('/inventory/invitation-cards')}>
-                                <span>Invitation Cards</span>
-                            </button>
-                            <button className="action-btn" onClick={() => navigate('/inventory/visiting-cards')}>
-                                <span>Visiting Cards</span>
-                            </button>
-                            <button className="action-btn" onClick={() => navigate('/inventory/bill-books')}>
-                                <span>Bill Books</span>
-                            </button>
-                            <button className="action-btn" onClick={() => navigate('/inventory/custom-cards')}>
-                                <span>Custom Cards</span>
-                            </button>
+                            {['Invitation Cards', 'Visiting Cards', 'Bill Books'].map(cat => (
+                                <button key={cat} className="action-btn" onClick={() => navigate(`/inventory/${cat.toLowerCase().replace(/ /g, '-')}`)}>
+                                    <span>{cat}</span>
+                                </button>
+                            ))}
+                            {[...new Set(inventory
+                                .map(item => item.category)
+                                .filter(cat => cat && !['Invitation Cards', 'Visiting Cards', 'Bill Books', 'Custom Card'].includes(cat))
+                            )].map(cat => (
+                                <button key={cat} className="action-btn" onClick={() => navigate(`/inventory/${cat.toLowerCase().replace(/ /g, '-')}`)}>
+                                    <span>{cat}</span>
+                                </button>
+                            ))}
                         </div>
                     </div>
                 </div>

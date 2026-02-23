@@ -16,12 +16,16 @@ const names = {
 const InventoryCategory = () => {
   const { category, subtype } = useParams();
   const navigate = useNavigate();
-  const title = names[category] || 'Category';
+  const title = names[category] || (category ? category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Category');
   const { inventory, settings } = useData();
 
   const filterBySubtype = (list) => {
     const categoryName = names[category];
-    let filtered = list.filter(i => i.category === categoryName);
+    let filtered = list.filter(i => {
+      if (categoryName) return i.category === categoryName;
+      // Fallback for custom dynamic categories: match by slug
+      return (i.category || '').toLowerCase().replace(/ /g, '-') === category;
+    });
 
     if (!subtype) return filtered;
 
