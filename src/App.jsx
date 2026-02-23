@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard';
 import NewOrder from './components/NewOrder';
 import Orders from './components/Orders';
 import OrderCategory from './components/OrderCategory';
+import OrderTypeCategory from './components/OrderTypeCategory';
 import Expenditure from './components/Expenditure';
 import ExpenditureType from './components/ExpenditureType';
 import InventoryCategory from './components/InventoryCategory';
@@ -38,6 +39,8 @@ function App() {
           <Route path="/orders/new" element={<ProtectedRoute><NewOrder /></ProtectedRoute>} />
           <Route path="/orders/new/:category" element={<ProtectedRoute><OrderCategory /></ProtectedRoute>} />
           <Route path="/orders/new/:category/:subtype" element={<ProtectedRoute><OrderCategory /></ProtectedRoute>} />
+          <Route path="/orders/new/type/:typeId" element={<ProtectedRoute><OrderTypeCategory /></ProtectedRoute>} />
+          <Route path="/orders/new/type/:typeId/sub/:subId" element={<ProtectedRoute><OrderTypeCategory /></ProtectedRoute>} />
           <Route path="/orders/edit/:category/:orderId" element={<ProtectedRoute><OrderCategory /></ProtectedRoute>} />
           <Route path="/expenditure" element={<ProtectedRoute><Expenditure /></ProtectedRoute>} />
           <Route path="/expenditure/:type" element={<ProtectedRoute><ExpenditureType /></ProtectedRoute>} />

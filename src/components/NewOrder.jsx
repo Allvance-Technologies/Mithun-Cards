@@ -1,9 +1,15 @@
+import React from 'react';
 import Sidebar from './Sidebar';
-import { FileText, Book, IdCard, Image, Receipt } from 'lucide-react';
+import { FolderOpen, Receipt } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useData } from '../context/DataContext';
 
 const NewOrder = () => {
   const navigate = useNavigate();
+  const { cardTypes } = useData();
+
+  // Color palette for card type icons
+  const iconColors = ['blue', 'indigo', 'purple', 'pink', 'green', 'orange', 'teal', 'red'];
 
   return (
     <div className="dashboard-container">
@@ -15,22 +21,27 @@ const NewOrder = () => {
           </div>
           <div className="card">
             <div className="actions-grid">
-              <button className="action-btn" onClick={() => navigate('/orders/new/invitation-cards')}>
-                <div className="action-icon blue"><FileText size={20} /></div>
-                <span>Invitation Cards</span>
+              {/* Dynamic Card Type Buttons from API */}
+              {cardTypes.map((ct, index) => (
+                <button key={ct.id} className="action-btn" onClick={() => navigate(`/orders/new/type/${ct.id}`)}>
+                  <div className={`action-icon ${iconColors[index % iconColors.length]}`}><FolderOpen size={20} /></div>
+                  <span>{ct.name}</span>
+                </button>
+              ))}
+
+              {/* New Bill - always available */}
+              <button className="action-btn" onClick={() => navigate('/orders/new/new-bill')}>
+                <div className="action-icon green"><Receipt size={20} /></div>
+                <span>New Bill</span>
               </button>
-              <button className="action-btn" onClick={() => navigate('/orders/new/bill-books')}>
-                <div className="action-icon indigo"><Book size={20} /></div>
-                <span>Bill Books</span>
-              </button>
-              <button className="action-btn" onClick={() => navigate('/orders/new/visiting-cards')}>
-                <div className="action-icon purple"><IdCard size={20} /></div>
-                <span>Visiting Cards</span>
-              </button>
-              <button className="action-btn" onClick={() => navigate('/orders/new/posters')}>
-                <div className="action-icon pink"><Image size={20} /></div>
-                <span>Posters</span>
-              </button>
+
+              {cardTypes.length === 0 && (
+                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px 20px', color: '#9CA3AF' }}>
+                  <FolderOpen size={40} style={{ marginBottom: '12px', opacity: 0.5 }} />
+                  <p style={{ fontSize: '15px', fontWeight: '500', marginBottom: '6px' }}>No card types created yet</p>
+                  <p style={{ fontSize: '13px' }}>Go to Inventory → Add Card Type to create categories first.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
