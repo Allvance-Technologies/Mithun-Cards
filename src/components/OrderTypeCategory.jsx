@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import { Search, Plus, Minus, Trash2, Save, ArrowLeft } from 'lucide-react';
+import { Search, Plus, Minus, Trash2, Save, ArrowLeft, FolderOpen } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { useData } from '../context/DataContext';
 
@@ -10,14 +10,17 @@ const OrderTypeCategory = () => {
     const navigate = useNavigate();
     const { inventory, customers, orders, cardTypes, getSubcategories, addOrder, updateOrder, deleteOrder, settings } = useData();
 
+    const isAllTypes = typeId === 'all';
     const [subcategories, setSubcategories] = useState([]);
-    const [loadingSubs, setLoadingSubs] = useState(true);
+    const [loadingSubs, setLoadingSubs] = useState(false);
 
-    const cardType = cardTypes.find(ct => ct.id === parseInt(typeId));
-    const title = cardType?.name || 'Order';
+    const cardType = isAllTypes ? null : cardTypes.find(ct => ct.id === parseInt(typeId));
+    const title = isAllTypes ? 'New Bill' : (cardType?.name || 'Order');
 
     useEffect(() => {
-        loadSubcategories();
+        if (!isAllTypes && typeId) {
+            loadSubcategories();
+        }
     }, [typeId]);
 
     const loadSubcategories = async () => {
@@ -163,6 +166,36 @@ const OrderTypeCategory = () => {
         }
     };
 
+    // ── Breadcrumb back navigation ──
+    const handleBack = () => {
+        if (subId) {
+            // Go back from products to subcategories
+            navigate(`/orders/new/type/${typeId}`);
+        } else if (!isAllTypes) {
+            // Go back from subcategories to product types (all) or New Order
+            navigate('/orders/new/type/all');
+        } else {
+            // Go back from all types to New Order
+            navigate('/orders/new');
+        }
+    };
+
+    // ── Build breadcrumb text ──
+    const getBreadcrumb = () => {
+        let crumb = 'New Order';
+        if (isAllTypes && !subId) {
+            crumb += ' → Select Product Type';
+        } else if (!isAllTypes && !subId) {
+            crumb += ` → ${title}`;
+        } else if (subId) {
+            crumb += ` → ${title} → ${currentSubcategory?.name || 'Products'}`;
+        }
+        return crumb;
+    };
+
+    // ── Icon colors for product types ──
+    const iconColors = ['blue', 'indigo', 'purple', 'pink', 'green', 'orange', 'teal', 'red'];
+
     return (
         <div className="dashboard-container">
             <Sidebar />
@@ -171,21 +204,48 @@ const OrderTypeCategory = () => {
                     {/* Breadcrumb Header */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
                         <button
-                            onClick={() => subId ? navigate(`/orders/new/type/${typeId}`) : navigate('/orders/new')}
+                            onClick={handleBack}
                             style={{ background: 'none', border: '1px solid #E5E7EB', borderRadius: '8px', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center' }}
                         >
                             <ArrowLeft size={20} />
                         </button>
                         <div>
                             <p style={{ fontSize: '12px', color: '#6B7280', margin: 0 }}>
-                                New Order → {title}{currentSubcategory ? ` → ${currentSubcategory.name}` : ''}
+                                {getBreadcrumb()}
                             </p>
-                            <h1 className="page-title" style={{ margin: 0 }}>{subId ? currentSubcategory?.name || 'Products' : title}</h1>
+                            <h1 className="page-title" style={{ margin: 0 }}>
+                                {isAllTypes && !subId
+                                    ? 'Select Product Type'
+                                    : subId
+                                        ? currentSubcategory?.name || 'Products'
+                                        : title}
+                            </h1>
                         </div>
                     </div>
 
-                    {/* Level 2: Show subcategories if no subId selected */}
-                    {!subId ? (
+                    {/* ──────── Level 1: Show all product types (when typeId === 'all') ──────── */}
+                    {isAllTypes && !subId ? (
+                        <div className="card">
+                            <div className="actions-grid">
+                                {cardTypes.map((ct, index) => (
+                                    <button key={ct.id} className="action-btn" onClick={() => navigate(`/orders/new/type/${ct.id}`)}>
+                                        <div className={`action-icon ${iconColors[index % iconColors.length]}`}><FolderOpen size={20} /></div>
+                                        <span>{ct.name}</span>
+                                        <span style={{ fontSize: '12px', color: '#9CA3AF' }}>{ct.subcategories_count || 0} subcategories</span>
+                                    </button>
+                                ))}
+                                {cardTypes.length === 0 && (
+                                    <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: '#9CA3AF' }}>
+                                        <FolderOpen size={40} style={{ marginBottom: '12px', opacity: 0.5 }} />
+                                        <p style={{ fontWeight: '500', marginBottom: '6px' }}>No product types created yet</p>
+                                        <p style={{ fontSize: '13px' }}>Go to Inventory → Add Product Type to create categories first.</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        /* ──────── Level 2: Show subcategories ──────── */
+                    ) : !subId ? (
                         <div className="card">
                             {loadingSubs ? (
                                 <div style={{ textAlign: 'center', padding: '40px', color: '#9CA3AF' }}>Loading subcategories...</div>
@@ -206,8 +266,9 @@ const OrderTypeCategory = () => {
                                 </div>
                             )}
                         </div>
+
+                        /* ──────── Level 3: Show products + order form ──────── */
                     ) : (
-                        /* Level 3: Show products + order form */
                         <div className="new-order-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '16px' }}>
                             <div className="order-selection-area">
                                 <div className="search-bar-container">
@@ -237,10 +298,10 @@ const OrderTypeCategory = () => {
                                                     </div>
                                                 )}
                                                 <div className="product-info">
-                                                    <h4>{item.title}</h4>
-                                                    <p className="price">{getCurrencySymbol()} {parseFloat(item.price).toFixed(2)}</p>
+                                                    <h4>{item.title || 'Untitled'}</h4>
+                                                    <p className="price">{getCurrencySymbol()} {parseFloat(item.price || 0).toFixed(2)}</p>
                                                     <span className={`stock-badge ${item.status === 'In Stock' ? 'success' : 'warning'}`}>
-                                                        {item.stock} in stock
+                                                        {item.stock ?? 0} in stock
                                                     </span>
                                                 </div>
                                                 <button className="add-btn"><Plus size={18} /></button>
@@ -311,8 +372,8 @@ const OrderTypeCategory = () => {
                                         selectedItems.map(item => (
                                             <div key={item.id} className="order-item">
                                                 <div className="item-details">
-                                                    <h4>{item.title}</h4>
-                                                    <p>{getCurrencySymbol()} {parseFloat(item.price).toFixed(2)} x {item.quantity}</p>
+                                                    <h4>{item.title || 'Untitled'}</h4>
+                                                    <p>{getCurrencySymbol()} {parseFloat(item.price || 0).toFixed(2)} x {item.quantity}</p>
                                                 </div>
                                                 <div className="item-actions">
                                                     <button onClick={() => updateQuantity(item.id, -1)}><Minus size={14} /></button>
@@ -518,7 +579,7 @@ const OrderTypeCategory = () => {
                                         }}>Share WhatsApp</button>
                                         <button className="btn-secondary" onClick={() => {
                                             const printWindow = window.open('', '_blank');
-                                            printWindow.document.write(`<html><head><title>Invoice ${invoiceOrder.id}</title></head><body>${document.getElementById('invoice-content').outerHTML}<script>window.onload=()=>window.print()</script></body></html>`);
+                                            printWindow.document.write(`<html><head><title>Invoice ${invoiceOrder.id}</title></head><body>${document.getElementById('invoice-content').outerHTML}<script>window.onload=()=>window.print()<\/script></body></html>`);
                                             printWindow.document.close();
                                         }}>Print</button>
                                     </div>

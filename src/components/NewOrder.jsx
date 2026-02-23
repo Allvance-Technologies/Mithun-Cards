@@ -29,8 +29,8 @@ const NewOrder = () => {
                 </button>
               ))}
 
-              {/* New Bill - always available */}
-              <button className="action-btn" onClick={() => navigate('/orders/new/new-bill')}>
+              {/* New Bill - shows all product types */}
+              <button className="action-btn" onClick={() => navigate('/orders/new/type/all')}>
                 <div className="action-icon green"><Receipt size={20} /></div>
                 <span>New Bill</span>
               </button>
