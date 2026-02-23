@@ -263,6 +263,29 @@ export const DataProvider = ({ children }) => {
         }
     };
 
+    const updateInventoryItem = async (id, item) => {
+        try {
+            const response = await api.put(`inventory/${id}`, item);
+            const updatedItem = response.data;
+            setInventory(inventory.map(i => i.id === id ? updatedItem : i));
+            return updatedItem;
+        } catch (error) {
+            console.error('Update inventory error:', error);
+            throw error;
+        }
+    };
+
+    const deleteInventoryItem = async (id) => {
+        try {
+            await api.delete(`inventory/${id}`);
+            setInventory(inventory.filter(i => i.id !== id));
+            return { success: true };
+        } catch (error) {
+            console.error('Delete inventory error:', error);
+            throw error;
+        }
+    };
+
     const deleteOrder = async (orderId) => {
         try {
             await api.delete(`orders/${orderId}`);
@@ -304,6 +327,8 @@ export const DataProvider = ({ children }) => {
             deleteOrder,
             deleteCustomer,
             addInventoryItem,
+            updateInventoryItem,
+            deleteInventoryItem,
             updateSettings,
             currentUser,
             login,
