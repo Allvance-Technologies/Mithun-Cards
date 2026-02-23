@@ -107,6 +107,10 @@ const Inventory = () => {
                                 <Search className="search-icon" size={18} />
                                 <input type="text" placeholder="Search card types..." />
                             </div>
+                            <button className="btn-primary" onClick={() => setShowAddModal(true)}>
+                                <Plus size={20} />
+                                <span>Add Product</span>
+                            </button>
                         </div>
                     </div>
 
