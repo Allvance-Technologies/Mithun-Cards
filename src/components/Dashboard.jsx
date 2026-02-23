@@ -96,7 +96,7 @@ const Dashboard = () => {
                                         </div>
                                     ))
                                 ) : (
-                                    <div style={{ padding: '12px', color: '#6B7280', fontSize: '16px' }}>All items are well stocked.</div>
+                                    <div style={{ padding: '12px', color: '#6B7280', fontSize: '18px' }}>All items are well stocked.</div>
                                 )}
                             </div>
                         </div>
