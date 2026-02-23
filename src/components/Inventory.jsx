@@ -19,7 +19,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Inventory = () => {
     const navigate = useNavigate();
-    const { addInventoryItem, updateInventoryItem } = useData();
+    const { inventory, addInventoryItem, updateInventoryItem } = useData();
     const [showAddModal, setShowAddModal] = useState(false);
     const [newItem, setNewItem] = useState({ title: '', category: 'Invitation Cards', customCategory: '', stock: 0, price: 0, image: '' });
     const [imagePreview, setImagePreview] = useState('');
