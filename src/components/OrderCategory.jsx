@@ -167,8 +167,9 @@ const OrderCategory = () => {
 
   const calculateTotal = () => {
     const subtotal = calculateSubtotal();
-    const tax = calculateTax(subtotal);
-    return subtotal + tax - discount;
+    const discountedSubtotal = Math.max(0, subtotal - discount);
+    const tax = calculateTax(discountedSubtotal);
+    return discountedSubtotal + tax;
   };
 
   const calculateBalance = () => {
@@ -190,6 +191,10 @@ const OrderCategory = () => {
 
     const orderData = {
       items: itemsForOrder,
+      subtotal: calculateSubtotal(),
+      tax: calculateTax(calculateSubtotal()),
+      total: calculateTotal(),
+      discount: discount,
       advance_paid: amountPaid,
       payment_method: paymentMethod === 'Others' ? customPaymentMethod : paymentMethod,
       status: amountPaid >= calculateTotal() ? 'Paid' : 'Pending'
@@ -388,7 +393,7 @@ const OrderCategory = () => {
 
                 <div className="pricing-breakdown">
                   <div className="row"><span>Subtotal</span><span>{settings.currency === 'INR' ? '₹' : settings.currency === 'USD' ? '$' : settings.currency} {calculateSubtotal().toFixed(2)}</span></div>
-                  <div className="row"><span>Tax</span><span>{settings.currency === 'INR' ? '₹' : settings.currency === 'USD' ? '$' : settings.currency} {calculateTax(calculateSubtotal()).toFixed(2)}</span></div>
+                  <div className="row"><span>Tax</span><span>{settings.currency === 'INR' ? '₹' : settings.currency === 'USD' ? '$' : settings.currency} {calculateTax(Math.max(0, calculateSubtotal() - discount)).toFixed(2)}</span></div>
                   <div className="row">
                     <span>Discount</span>
                     <input type="number" className="discount-input" value={discount} onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)} style={{ width: '80px', textAlign: 'right' }} />
@@ -434,8 +439,8 @@ const OrderCategory = () => {
                     </div>
 
                     <div className="row" style={{ fontWeight: '700', color: calculateBalance() > 0 ? '#DC2626' : '#059669' }}>
-                      <span>Balance Due</span>
-                      <span>{settings.currency === 'INR' ? '₹' : settings.currency === 'USD' ? '$' : settings.currency} {calculateBalance().toFixed(2)}</span>
+                      <span>{calculateBalance() > 0 ? 'Balance Due' : 'Change'}</span>
+                      <span>{settings.currency === 'INR' ? '₹' : settings.currency === 'USD' ? '$' : settings.currency} {Math.abs(calculateBalance()).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -632,7 +637,7 @@ const OrderCategory = () => {
 
                 <div className="pricing-breakdown">
                   <div className="row"><span>Subtotal</span><span>{settings.currency === 'INR' ? '₹' : settings.currency === 'USD' ? '$' : settings.currency} {calculateSubtotal().toFixed(2)}</span></div>
-                  <div className="row"><span>Tax</span><span>{settings.currency === 'INR' ? '₹' : settings.currency === 'USD' ? '$' : settings.currency} {calculateTax(calculateSubtotal()).toFixed(2)}</span></div>
+                  <div className="row"><span>Tax</span><span>{settings.currency === 'INR' ? '₹' : settings.currency === 'USD' ? '$' : settings.currency} {calculateTax(Math.max(0, calculateSubtotal() - discount)).toFixed(2)}</span></div>
                   <div className="row">
                     <span>Discount</span>
                     <input type="number" className="discount-input" value={discount} onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)} style={{ width: '80px', textAlign: 'right' }} />
@@ -678,8 +683,8 @@ const OrderCategory = () => {
                     </div>
 
                     <div className="row" style={{ fontWeight: '700', color: calculateBalance() > 0 ? '#DC2626' : '#059669' }}>
-                      <span>Balance Due</span>
-                      <span>{settings.currency === 'INR' ? '₹' : settings.currency === 'USD' ? '$' : settings.currency} {calculateBalance().toFixed(2)}</span>
+                      <span>{calculateBalance() > 0 ? 'Balance Due' : 'Change'}</span>
+                      <span>{settings.currency === 'INR' ? '₹' : settings.currency === 'USD' ? '$' : settings.currency} {Math.abs(calculateBalance()).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -824,10 +829,20 @@ const OrderCategory = () => {
                               <span style={{ fontSize: '14px', fontWeight: 600 }}>- {settings.currency === 'INR' ? '₹' : settings.currency === 'USD' ? '$' : settings.currency} {(invoiceOrder.advance_paid || 0).toFixed(2)}</span>
                             </div>
                           )}
-                          {invoiceOrder.balance_due > 0 && (
+                          {invoiceOrder.balance_due > 0 ? (
                             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderTop: '1px dashed #E5E7EB', marginTop: '5px' }}>
                               <span style={{ fontSize: '16px', fontWeight: 700, color: '#DC2626' }}>Balance Due</span>
-                              <span style={{ fontSize: '16px', fontWeight: 700, color: '#DC2626' }}>{settings.currency === 'INR' ? '₹' : settings.currency === 'USD' ? '$' : settings.currency} {(invoiceOrder.balance_due || 0).toFixed(2)}</span>
+                              <span style={{ fontSize: '16px', fontWeight: 700, color: '#DC2626' }}>{settings.currency === 'INR' ? '₹' : settings.currency === 'USD' ? '$' : settings.currency} {invoiceOrder.balance_due.toFixed(2)}</span>
+                            </div>
+                          ) : invoiceOrder.balance_due < 0 ? (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderTop: '1px dashed #E5E7EB', marginTop: '5px' }}>
+                              <span style={{ fontSize: '16px', fontWeight: 700, color: '#059669' }}>Change</span>
+                              <span style={{ fontSize: '16px', fontWeight: 700, color: '#059669' }}>{settings.currency === 'INR' ? '₹' : settings.currency === 'USD' ? '$' : settings.currency} {Math.abs(invoiceOrder.balance_due).toFixed(2)}</span>
+                            </div>
+                          ) : (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderTop: '1px dashed #E5E7EB', marginTop: '5px' }}>
+                              <span style={{ fontSize: '16px', fontWeight: 700, color: '#059669' }}>Status</span>
+                              <span style={{ fontSize: '16px', fontWeight: 700, color: '#059669' }}>Fully Paid</span>
                             </div>
                           )}
                         </div>

@@ -160,7 +160,13 @@ export const DataProvider = ({ children }) => {
 
             const backendOrderData = {
                 customer_id: customerId,
+                subtotal: orderData.subtotal,
+                tax: orderData.tax,
+                total: orderData.total,
+                discount: orderData.discount,
                 advance_paid: orderData.advance_paid || 0,
+                payment_method: orderData.payment_method,
+                status: orderData.status?.toLowerCase(),
                 items: orderData.items.map(item => ({
                     product_name: item.title,
                     quantity: item.quantity,
@@ -217,7 +223,12 @@ export const DataProvider = ({ children }) => {
 
             const backendOrderData = {
                 customer_id: customerId,
+                subtotal: orderData.subtotal,
+                tax: orderData.tax,
+                total: orderData.total,
+                discount: orderData.discount,
                 advance_paid: orderData.advance_paid || 0,
+                payment_method: orderData.payment_method,
                 status: orderData.status?.toLowerCase() || 'pending',
                 items: orderData.items.map(item => ({
                     product_name: item.title,
