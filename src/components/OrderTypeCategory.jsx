@@ -4,6 +4,7 @@ import Sidebar from './Sidebar';
 import { Search, Plus, Minus, Trash2, Save, ArrowLeft, FolderOpen } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { useData } from '../context/DataContext';
+import { GstInvoice, NonGstInvoice } from './InvoiceTemplates';
 
 const OrderTypeCategory = () => {
     const { typeId, subId } = useParams();
@@ -476,121 +477,39 @@ const OrderTypeCategory = () => {
                                     onMouseOut={(e) => e.target.style.backgroundColor = '#F3F4F6'}
                                 >&times;</button>
                                 <div style={{ padding: '24px', overflowY: 'auto', flex: 1, borderRadius: '12px' }}>
-                                    <div id="invoice-content" style={{ padding: '30px 40px', backgroundColor: '#fff', color: '#111827', fontFamily: "'Inter', sans-serif", display: 'flex', flexDirection: 'column', minHeight: '275mm', boxSizing: 'border-box' }}>
-                                        <div style={{ flex: 1 }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #111827', paddingBottom: '20px', marginBottom: '30px', alignItems: 'center' }}>
-                                                <div>
-                                                    <h1 style={{ fontSize: '32px', fontWeight: 800, margin: 0, color: '#111827', letterSpacing: '-0.025em' }}>{settings?.companyName || 'Mithun Cards'}</h1>
-                                                    <p style={{ margin: '4px 0 0', color: '#4B5563', fontSize: '14px' }}>Premium Printing & Design Solutions</p>
-                                                </div>
-                                                <div style={{ height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                                                    <img src="/logo.png" alt="Logo" style={{ height: '100%', objectFit: 'contain', mixBlendMode: 'multiply' }} onError={(e) => e.target.style.display = 'none'} />
-                                                </div>
-                                            </div>
+                                    {includeGST ? (
+                                        <GstInvoice
+                                            order={invoiceOrder}
+                                            settings={settings}
+                                            currentSubcategory={currentSubcategory}
+                                            title={title}
+                                        />
+                                    ) : (
+                                        <NonGstInvoice
+                                            order={invoiceOrder}
+                                            settings={settings}
+                                            currentSubcategory={currentSubcategory}
+                                            title={title}
+                                        />
+                                    )}
 
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', marginBottom: '40px' }}>
-                                                <div>
-                                                    <h4 style={{ fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', color: '#6B7280', marginBottom: '8px', letterSpacing: '0.05em' }}>Bill To</h4>
-                                                    <p style={{ margin: 0, fontWeight: 700, fontSize: '16px', color: '#111827' }}>{invoiceOrder.customer}</p>
-                                                </div>
-                                                <div style={{ textAlign: 'right' }}>
-                                                    <div style={{ marginBottom: '8px' }}>
-                                                        <p style={{ margin: 0, color: '#4B5563', fontSize: '13px', fontWeight: 600 }}>Invoice #: <span style={{ color: '#111827' }}>{invoiceOrder.id}</span></p>
-                                                    </div>
-                                                    <p style={{ margin: 0, fontSize: '14px', color: '#4B5563' }}><span style={{ fontWeight: 600, color: '#111827' }}>Date:</span> {invoiceOrder.date}</p>
-                                                    <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#4B5563' }}><span style={{ fontWeight: 600, color: '#111827' }}>Category:</span> {title}{currentSubcategory ? ` > ${currentSubcategory.name}` : ''}</p>
-                                                </div>
-                                            </div>
-
-                                            <div style={{ marginBottom: '30px' }}>
-                                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                                    <thead>
-                                                        <tr style={{ backgroundColor: '#F9FAFB', borderTop: '1px solid #E5E7EB', borderBottom: '2px solid #111827' }}>
-                                                            <th style={{ textAlign: 'left', padding: '12px 10px', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', color: '#4B5563' }}>Item Description</th>
-                                                            <th style={{ textAlign: 'right', padding: '12px 10px', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', color: '#4B5563' }}>Price</th>
-                                                            <th style={{ textAlign: 'center', padding: '12px 10px', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', color: '#4B5563' }}>Qty</th>
-                                                            <th style={{ textAlign: 'right', padding: '12px 10px', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', color: '#4B5563' }}>Total</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {(invoiceOrder.items || []).map((item) => (
-                                                            <tr key={item.id} style={{ borderBottom: '1px solid #E5E7EB' }}>
-                                                                <td style={{ padding: '16px 10px', fontSize: '14px', color: '#111827', fontWeight: 500 }}>{item.title}</td>
-                                                                <td style={{ textAlign: 'right', padding: '16px 10px', fontSize: '14px', color: '#4B5563' }}>{getCurrencySymbol()} {parseFloat(item.price).toFixed(2)}</td>
-                                                                <td style={{ textAlign: 'center', padding: '16px 10px', fontSize: '14px', color: '#4B5563' }}>{item.quantity}</td>
-                                                                <td style={{ textAlign: 'right', padding: '16px 10px', fontSize: '14px', color: '#111827', fontWeight: 600 }}>{getCurrencySymbol()} {(parseFloat(item.price) * item.quantity).toFixed(2)}</td>
-                                                            </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-
-                                        <div style={{ borderTop: '2px solid #111827', paddingTop: '20px' }}>
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
-                                                <div>
-                                                    <p style={{ fontSize: '12px', color: '#6B7280', margin: '0 0 8px 0', textTransform: 'uppercase', fontWeight: 600 }}>Notes</p>
-                                                    <p style={{ fontSize: '13px', color: '#4B5563', margin: 0, lineHeight: 1.5 }}>Please check the items before leaving. Goods once sold will not be taken back.</p>
-                                                </div>
-                                                <div>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #E5E7EB' }}>
-                                                        <span style={{ fontSize: '14px', color: '#4B5563' }}>Subtotal</span>
-                                                        <span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>{getCurrencySymbol()} {(invoiceOrder.subtotal || 0).toFixed(2)}</span>
-                                                    </div>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #E5E7EB' }}>
-                                                        <span style={{ fontSize: '14px', color: '#4B5563' }}>Tax (GST)</span>
-                                                        <span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>+ {getCurrencySymbol()} {(invoiceOrder.tax || 0).toFixed(2)}</span>
-                                                    </div>
-                                                    {invoiceOrder.discount > 0 && (
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #E5E7EB' }}>
-                                                            <span style={{ fontSize: '14px', color: '#4B5563' }}>Discount</span>
-                                                            <span style={{ fontSize: '14px', fontWeight: 600, color: '#DC2626' }}>- {getCurrencySymbol()} {(invoiceOrder.discount || 0).toFixed(2)}</span>
-                                                        </div>
-                                                    )}
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 0 0' }}>
-                                                        <span style={{ fontSize: '20px', fontWeight: 800, color: '#111827' }}>Total Amount</span>
-                                                        <span style={{ fontSize: '20px', fontWeight: 800, color: '#111827' }}>{getCurrencySymbol()} {invoiceOrder.amount.toFixed(2)}</span>
-                                                    </div>
-                                                    {invoiceOrder.advance_paid > 0 && (
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', color: '#059669' }}>
-                                                            <span style={{ fontSize: '14px', fontWeight: 600 }}>Amount Paid</span>
-                                                            <span style={{ fontSize: '14px', fontWeight: 600 }}>- {getCurrencySymbol()} {(invoiceOrder.advance_paid || 0).toFixed(2)}</span>
-                                                        </div>
-                                                    )}
-                                                    {invoiceOrder.balance_due > 0 ? (
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderTop: '1px dashed #E5E7EB', marginTop: '5px' }}>
-                                                            <span style={{ fontSize: '16px', fontWeight: 700, color: '#DC2626' }}>Balance Due</span>
-                                                            <span style={{ fontSize: '16px', fontWeight: 700, color: '#DC2626' }}>{getCurrencySymbol()} {invoiceOrder.balance_due.toFixed(2)}</span>
-                                                        </div>
-                                                    ) : invoiceOrder.balance_due < 0 ? (
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderTop: '1px dashed #E5E7EB', marginTop: '5px' }}>
-                                                            <span style={{ fontSize: '16px', fontWeight: 700, color: '#059669' }}>Change</span>
-                                                            <span style={{ fontSize: '16px', fontWeight: 700, color: '#059669' }}>{getCurrencySymbol()} {Math.abs(invoiceOrder.balance_due).toFixed(2)}</span>
-                                                        </div>
-                                                    ) : (
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderTop: '1px dashed #E5E7EB', marginTop: '5px' }}>
-                                                            <span style={{ fontSize: '16px', fontWeight: 700, color: '#059669' }}>Status</span>
-                                                            <span style={{ fontSize: '16px', fontWeight: 700, color: '#059669' }}>Fully Paid</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            <div style={{ marginTop: '40px', borderTop: '1px solid #E5E7EB', paddingTop: '15px', textAlign: 'center' }}>
-                                                <p style={{ margin: 0, fontSize: '11px', color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Thank you for your business!</p>
-                                            </div>
-                                        </div>
-                                    </div>
                                     <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
                                         <button className="btn-primary" onClick={() => {
                                             const element = document.getElementById('invoice-content');
-                                            html2pdf().set({
+                                            const opt = includeGST ? {
                                                 margin: 5,
                                                 filename: `Invoice_${invoiceOrder.id}.pdf`,
                                                 image: { type: 'jpeg', quality: 1 },
                                                 html2canvas: { scale: 2, useCORS: true, letterRendering: true },
                                                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                                            }).from(element).save();
+                                            } : {
+                                                margin: 5,
+                                                filename: `Invoice_${invoiceOrder.id}.pdf`,
+                                                image: { type: 'jpeg', quality: 1 },
+                                                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                                                jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' }
+                                            };
+                                            html2pdf().set(opt).from(element).save();
                                         }}>Download PDF</button>
                                         <button className="btn-outline" onClick={() => {
                                             const msg = `Invoice ${invoiceOrder.id}\nCustomer: ${invoiceOrder.customer}\nTotal: ${(invoiceOrder.amount || 0).toFixed(2)} ${getCurrencySymbol()}`;
